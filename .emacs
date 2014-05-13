@@ -35,6 +35,9 @@
 ;; Auto complete
 (require 'auto-complete-settings)
 
+;; Flymake
+;(load-file "~/.emacs.d/tool/python-flymake.el")
+
 ;; Camelcase functions
 ;(require 'camelcase-settings)
 
