@@ -14,6 +14,10 @@
 ; language
 (setq current-language-environment "English")
 
+
+;(load-file "/home/owainevans/Venturecxx/tool/python-flymake.el")
+
+
 ; don't show the startup screen
 (setq inhibit-startup-screen 1)
 ; don't show the menu bar
@@ -68,19 +72,25 @@
 (setq-default case-fold-search 1)
 
 ;; copy and cut
-(defun xah-cut-line-or-region ()
-  "Cut the current line, or current text selection."
-  (interactive)
-  (if (region-active-p)
-      (kill-region (region-beginning) (region-end))
-    (kill-region (line-beginning-position) (line-beginning-position 2)) ) )
+(defun copy-line (arg)
+  "Copy lines (as many as prefix argument) in the kill ring"
+  (interactive "p")
+  (kill-ring-save (line-beginning-position)
+                  (line-beginning-position (+ 1 arg)))
+  (message "%d line%s copied" arg (if (= 1 arg) "" "s")))
 
-(defun xah-copy-line-or-region ()
-  "Copy current line, or current text selection."
+
+(defun quick-cut-line ()
+  "Cut the whole line that point is on.  Consecutive calls to this command append each line to the kill-ring."
   (interactive)
-  (if (region-active-p)
-      (kill-ring-save (region-beginning) (region-end))
-    (kill-ring-save (line-beginning-position) (line-beginning-position 2)) ) )
+  (let ((beg (line-beginning-position 1))
+	(end (line-beginning-position 2)))
+    (if (eq last-command 'quick-cut-line)
+	(kill-append (buffer-substring beg end) (< end beg))
+      (kill-new (buffer-substring beg end)))
+    (delete-region beg end))
+  (beginning-of-line 1)
+  (setq this-command 'quick-cut-line))
 
 (defun avi-kill-line-save (&optional arg)
   "Copy to the kill ring from point to the end of the current line.
@@ -95,13 +105,13 @@ text before point to the beginning of the current line."
               (end-of-visible-line))
             (point)))))
 
-
-(global-set-key (kbd "M-7") 'xah-cut-line-or-region) ; cut
-(global-set-key (kbd "C-7") 'xah-copy-line-or-region) ; copy
+(global-set-key (kbd "C-7") 'copy-line)
+(global-set-key (kbd "M-7") 'quick-cut-line)
 (global-set-key (kbd "M-o") 'avi-kill-line-save)
 
-; set the keybinding so that you can use f4 for goto line
 (global-set-key [f8] 'goto-line)
+;; (global-set-key (kbd "S-C-<down>") 'shrink-window)
+;; (global-set-key (kbd "S-C-<up>") 'enlarge-window)
 
 
 (global-set-key (kbd "M-]") 'comint-previous-matching-input-from-input) 
